@@ -1,0 +1,1 @@
+An introduction to the OpenGL API learning the basics of rendiner in OpenGl including: rasterizing basic primitives, loading and rendering of 3d geometry using simple wireframes, texture mapping, calculating and using normals for lighting effects
