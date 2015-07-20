@@ -10,7 +10,6 @@
 #include <GLUT/glut.h>
 
 void initOpenGL() {
-    //these commands ensure that drawing commands affect the projection matrix, rather than the model view matrix
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     
