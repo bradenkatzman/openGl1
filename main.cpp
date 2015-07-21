@@ -136,7 +136,28 @@ void key(unsigned char key, int x, int y) {
             cout << "reset" << endl;
                 glFrustum(-2.0,2.0,-2.0,2.0,1.0,5.0);
                 glutPostRedisplay();
-            break;
+            
+            
+            //W, A, Z, S make arrow pad
+            case 'w':
+                glTranslated(0.0, 1.0, 0.0);
+                glutPostRedisplay();
+                break;
+            
+            case 'a':
+                glTranslated(-1.0, 0.0, 0.0);
+                glutPostRedisplay();
+                break;
+            
+            case 'z':
+                glTranslated(0.0, -1.0, 0.0);
+                glutPostRedisplay();
+                break;
+        
+            case 's':
+                glTranslated(1.0, 0.0, 0.0);
+                glutPostRedisplay();
+                break;
     }
 }
 
