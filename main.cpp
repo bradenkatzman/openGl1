@@ -7,13 +7,15 @@
 //
 
 #include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
 #include <GLUT/glut.h>
 
 using namespace std;
 
-static double zoomFactor = 1.0;
 
-void initOpenGL(float zoomFactor) {
+void initOpenGL() {
     //these commands ensure that drawing commands affect the projection matrix, rather than the model view matrix
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -115,28 +117,17 @@ void display() {
 //zoom resource: https://www.opengl.org/archives/resources/faq/technical/viewing.htm
 void key(unsigned char key, int x, int y) {
     switch (key) {
-            //0 is zoom in
-            case 'o':
-                zoomFactor = 2.0;
-                cout << 2.0*zoomFactor << endl;
-                glFrustum(-2.0*zoomFactor,2.0*zoomFactor,-2.0*zoomFactor,2.0*zoomFactor,1.0*zoomFactor,5.0*zoomFactor);
-                glutPostRedisplay();
-            break;
-            
-            //i is zoom out
+            //i is zoom in
             case 'i':
-                zoomFactor = 1.0/2.0;
-                cout << -2.0*zoomFactor << endl;
-                glFrustum(-2.0*zoomFactor,2.0*zoomFactor,-2.0*zoomFactor,2.0*zoomFactor,1.0*zoomFactor,5.0*zoomFactor);
+                glTranslated(0.0, 0.0, 0.2);
                 glutPostRedisplay();
             break;
             
-            //r is reset
-            case 'r':
-            cout << "reset" << endl;
-                glFrustum(-2.0,2.0,-2.0,2.0,1.0,5.0);
+            //o is zoom out
+            case 'o':
+                glTranslated(0.0, 0.0, 2.0);
                 glutPostRedisplay();
-            
+                break;
             
             //W, A, Z, S make arrow pad
             case 'w':
@@ -164,15 +155,46 @@ void key(unsigned char key, int x, int y) {
 //adapted from: https://www.opengl.org/discussion_boards/showthread.php/173157-Glut-Mouse-Func
 void rotate(int button, int state, int x, int y){
     //right quadrant
-    if (x < 256){
+    if (x < glutGet(GLUT_WINDOW_WIDTH)/2) {
         glRotated(5.0, 0.0, 0.0, 10.0);
     }
     
     //left quadrant
-    if (x > 256){
+    if (x > glutGet(GLUT_WINDOW_WIDTH)/2){
         glRotated(-5.0, 0.0, 0.0, 10.0);
     }
     glutPostRedisplay();
+}
+
+
+//adapted from: https://en.wikibooks.org/wiki/OpenGL_Programming/Modern_OpenGL_Tutorial_Load_OBJ
+void load(const char* fileName, vector<float>& vertexData, vector<float>& textureData,
+          vector<float>& normalData) {
+    ifstream input;
+    input.open(fileName);
+    
+    if(!input) {
+        cout << fileName << " cannot be opened" << endl;
+        exit(0);
+    }
+    
+    string line;
+    while(getline(input, line)) {
+        //if this is a vertex line
+        if (line.substr(0, 2) == "v") {
+            //parse 3 vertices, push onto vertexData vector
+        }
+        //else if this is a texture coordinate line
+        else if(line.substr(0,3) == "vt ") {
+            //parse coordinates and push on textureData vector
+        }
+        //else if this is a face information line
+        else if (line.substr(0, 2) == "f ") {
+            //parse face info and push on faceData vector
+        }
+        //ignore all other lines including comments and vertex normal data
+        else { }
+    }
 }
 
 int main(int argc, char **argv) {
@@ -182,9 +204,15 @@ int main(int argc, char **argv) {
     glutInitWindowSize(512, 512);
     glutInitDisplayMode(GLUT_RGB);
     glutCreateWindow("Stanford Logo with OpenGL");
+    
+    //create data vectors and load geometry from obj files
+    vector<float> vertexData; //vertices
+    vector<float> textureData; //texture coordindates
+    vector<float> faceData; //faces
+    load("spock.obj", vertexData, textureData, faceData);
    
     //initialize state
-    initOpenGL(zoomFactor);
+    initOpenGL();
     glutDisplayFunc(display);
     
     //callbacks
