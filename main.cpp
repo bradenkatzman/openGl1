@@ -12,7 +12,7 @@
 #include <math.h>
 #include <vector>
 #include <stdio.h>
-#include <string>
+#include <string.h>
 #include <GLUT/glut.h>
 
 using namespace std;
@@ -27,14 +27,49 @@ struct Vertex {
     }
 };
 
+struct textureCoordinate {
+    float x, y;
+    
+    textureCoordinate(float x_, float y_) {
+        x = x_;
+        y = y_;
+    }
+};
+
+struct face {
+    int v1, v2, v3, tc1, tc2, tc3, vn1, vn2, vn3;
+    
+    //just vertices face
+    face(int v1_, int v2_, int v3_) {
+        v1 = v1_;
+        v2 = v2_;
+        v3 = v3_;
+    }
+    
+    //vertices, texture coordinates, and vertex normal face
+    face(int v1_, int v2_, int v3_, int tc1_, int tc2_, int tc3_,
+         int vn1_,int vn2_, int vn3_) {
+        v1 = v1_;
+        v2 = v2_;
+        v3 = v3_;
+        
+        tc1 = tc1_;
+        tc2 = tc2_;
+        tc3 = tc3_;
+        
+        vn1 = vn1_;
+        vn2 = vn2_;
+        vn3 = vn3_;
+    }
+};
+
 //create static data vectors
 static vector<Vertex> vertexData; //vertices
-static vector<float> textureData; //texture coordindates
-static vector<float> faceData; //faces
+static vector<textureCoordinate> textureData; //texture coordindates
+static vector<face> faceData; //faces
 
 //create static orbit variables
 static int oldX, oldY;
-static bool rotateCheck = false;
 static float theta =0.0f, phi=0.0f;
 
 void initOpenGL() {
@@ -76,15 +111,37 @@ void display() {
         //render faces
         for (int i = 0; i < faceData.size(); ++i) {
             
-            int triangleIndex = faceData[i]-1;
+            face face = faceData[i];
             
-            float x, y, z;
+            //render first vertex
+            int v1 = face.v1-1;
+            float x1, y1, z1;
+                
+            x1 = vertexData[v1].x;
+            y1 = vertexData[v1].y;
+            z1 = vertexData[v1].z;
+                
+            glVertex3f(x1, y1, z1-2.0);
             
-            x = vertexData[triangleIndex].x;
-            y = vertexData[triangleIndex].y;
-            z = vertexData[triangleIndex].z;
+            //render second vertex
+            int v2 = face.v2-1;
+            float x2, y2, z2;
             
-            glVertex3f(x, y, z-2.0);
+            x2 = vertexData[v2].x;
+            y2 = vertexData[v2].y;
+            z2 = vertexData[v2].z;
+            
+            glVertex3f(x2, y2, z2-2.0);
+            
+            //render third vertex
+            int v3 = face.v3-1;
+            float x3, y3, z3;
+            
+            x3 = vertexData[v3].x;
+            y3 = vertexData[v3].y;
+            z3 = vertexData[v3].z;
+            
+            glVertex3f(x3, y3, z3-2.0);
         }
     glEnd();
     
@@ -187,39 +244,91 @@ void load(const char* fileName) {
             istringstream is(line.substr(3));
             
             //parse coordinates and push on textureData vector
-            float a, b, c;
+            float a, b;
             
             //**********would need to check if there is third number before copying to c********
             is >> a;
             is >> b;
-            is >> c;
             
-            textureData.push_back(a);
-            textureData.push_back(b);
-            textureData.push_back(c);
+            textureCoordinate tC(a,b);
             
-            cout << c << endl;
+            textureData.push_back(tC);
         }
         //else if this is a face information line
         else if (line.substr(0, 2) == "f ") {
             istringstream is(line.substr(2));
             
-            //parse face info and push on faceData vector
+                //parse face info and push on faceData vector
+                int v1, v2, v3, tc1, tc2, tc3, vn1, vn2, vn3;
+                char c1, d1, c2, d2, c3, d3;
             
-            //if (
-            int a, b, c;
+                is >> v1;
             
-            is >> a;
-            is >> b;
-            is >> c;
+            cout << is.peek() << endl;
             
-            faceData.push_back(a);
-            faceData.push_back(b);
-            faceData.push_back(c);
+                //check if next character is /
+                if (is.peek() == '/') {
+                //FIRST VERTEX INFO
+                    //discard /
+                    is >> c1;
+                    
+                    //store texture coordinate
+                    is >> tc1;
+                    
+                    //discard /
+                    is >> d1;
+                    
+                    //store vertex normal
+                    is >> vn1;
+                    
+                //SECOND VERTEX INFO
+                    //store second vertex
+                    is >> v2;
+                    
+                    //discard /
+                    is >> c2;
+                    
+                    //store texture coordinate
+                    is >> tc2;
+                    
+                    //discard /
+                    is >> d2;
+                    
+                    //store vertex normal
+                    is >> vn2;
+                    
+                //THIRD VERTEX INFO
+                    //store third vertex
+                    is >> v3;
+                    
+                    //discard /
+                    is >> c3;
+                    
+                    //store texture coordinate
+                    is >> tc3;
+                    
+                    //discard /
+                    is >> d3;
+                    
+                    //store vertex normal
+                    is >> vn3;
+                    
+                    face face(v1, v2, v3, tc1, tc2, tc3, vn1, vn2, vn3);
+                    faceData.push_back(face);
+                    
+                }
+                else {
+                    is >> v2;
+                    is >> v3;
+                    face face(v1, v2, v3);
+                    faceData.push_back(face);
+                }
         }
         //ignore all other lines including comments and vertex normal data
         else { }
     }
+    
+    cout << textureData.size();
 }
 
 int main(int argc, char **argv) {
@@ -228,7 +337,8 @@ int main(int argc, char **argv) {
     glutInit(&argc, argv);
     glutInitWindowSize(512, 512);
     glutInitDisplayMode(GLUT_RGB);
-    glutCreateWindow("Stanford Logo with OpenGL");
+    const char* title = argv[1];
+    glutCreateWindow(title);
     
     //load geometry from obj files
     load(argv[1]);
