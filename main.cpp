@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <vector>
 #include <string>
 #include <GLUT/glut.h>
@@ -22,7 +23,7 @@ void initOpenGL() {
     
     //sets the near plane at 1 and a far plane at 5
     //parameters (left, right, bottom, top, near, far)
-    glFrustum(-2.0,2.0,-2.0,2.0,1.0,5.0);
+    glFrustum(-2.0,2.0,-2.0,2.0,1.0,50.0);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
    
@@ -119,13 +120,13 @@ void key(unsigned char key, int x, int y) {
     switch (key) {
             //i is zoom in
             case 'i':
-                glTranslated(0.0, 0.0, 0.2);
+                glTranslated(0.0, 0.0, 0.1);
                 glutPostRedisplay();
             break;
             
             //o is zoom out
             case 'o':
-                glTranslated(0.0, 0.0, 2.0);
+                glTranslated(0.0, 0.0, -.1);
                 glutPostRedisplay();
                 break;
             
@@ -169,7 +170,7 @@ void rotate(int button, int state, int x, int y){
 
 //adapted from: https://en.wikibooks.org/wiki/OpenGL_Programming/Modern_OpenGL_Tutorial_Load_OBJ
 void load(const char* fileName, vector<float>& vertexData, vector<float>& textureData,
-          vector<float>& normalData) {
+          vector<float>& faceData) {
     ifstream input;
     input.open(fileName);
     
@@ -181,20 +182,62 @@ void load(const char* fileName, vector<float>& vertexData, vector<float>& textur
     string line;
     while(getline(input, line)) {
         //if this is a vertex line
-        if (line.substr(0, 2) == "v") {
+        if (line.substr(0, 2) == "v ") {
+            //WRITE WHAT THIS DOES
+            istringstream is(line.substr(2));
+            
             //parse 3 vertices, push onto vertexData vector
+            float a, b, c;
+            
+            is >> a;
+            is >> b;
+            is >> c;
+            
+            //instead of adding 4th w vertex, set conditions to include w = 1.0f after every 3 vertices
+            vertexData.push_back(a);
+            vertexData.push_back(b);
+            vertexData.push_back(c);
         }
         //else if this is a texture coordinate line
         else if(line.substr(0,3) == "vt ") {
+            istringstream is(line.substr(3));
+            
             //parse coordinates and push on textureData vector
+            float a, b, c;
+            
+            //**********would need to check if there is third number before copying to c********
+            is >> a;
+            is >> b;
+            is >> c;
+            
+            textureData.push_back(a);
+            textureData.push_back(b);
+            textureData.push_back(c);
+            
+            cout << c << endl;
         }
         //else if this is a face information line
         else if (line.substr(0, 2) == "f ") {
+            istringstream is(line.substr(2));
+            
             //parse face info and push on faceData vector
+            int a, b, c;
+            
+            is >> a;
+            is >> b;
+            is >> c;
+            
+            faceData.push_back(a);
+            faceData.push_back(b);
+            faceData.push_back(c);
         }
         //ignore all other lines including comments and vertex normal data
         else { }
     }
+    
+    cout << vertexData.size() << endl;
+    cout << textureData.size() << endl;
+    cout << faceData.size();
 }
 
 int main(int argc, char **argv) {
@@ -209,8 +252,8 @@ int main(int argc, char **argv) {
     vector<float> vertexData; //vertices
     vector<float> textureData; //texture coordindates
     vector<float> faceData; //faces
-    load("spock.obj", vertexData, textureData, faceData);
-   
+    load(argv[1], vertexData, textureData, faceData);
+    
     //initialize state
     initOpenGL();
     glutDisplayFunc(display);
