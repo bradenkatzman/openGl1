@@ -15,6 +15,20 @@
 
 using namespace std;
 
+struct Vertex {
+    float x, y, z;
+    
+    Vertex(float x_, float y_, float z_) {
+        x = x_;
+        y = y_;
+        z = z_;
+    }
+};
+
+//create data vectors
+static vector<Vertex> vertexData; //vertices
+static vector<float> textureData; //texture coordindates
+static vector<float> faceData; //faces
 
 void initOpenGL() {
     //these commands ensure that drawing commands affect the projection matrix, rather than the model view matrix
@@ -23,7 +37,7 @@ void initOpenGL() {
     
     //sets the near plane at 1 and a far plane at 5
     //parameters (left, right, bottom, top, near, far)
-    glFrustum(-2.0,2.0,-2.0,2.0,1.0,50.0);
+    glFrustum(-1.0,1.0,-1.0,1.0,1.0,50.0);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
    
@@ -34,83 +48,38 @@ void display() {
     
     glClear(GL_COLOR_BUFFER_BIT);
     
-    //set line width
-    glLineWidth(8.0f);
+    glEnable(GL_DEPTH_TEST);
+    
+    //discards inivisible polygons during rendering
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    
+    //set wire color to red
+    glColor3f(1.0, 0.0, 0.0);
+    
+    //set front faces to counterclockwise orientation i.e. front facing
+    glFrontFace(GL_CCW);
+    
+    //instruct OpenGL to draw only the outline of the polygon
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     
     //points must have z coordinates within the interval [-1 - -5] to be visible
-    glBegin(GL_LINES);
-        //set color of lines to red
-        glColor3f(1.0f, 0.0f, 0.0f);
-    
-        //parameter order: (x1, y1, z1)
-        //                 (x2, y2, z2)
-    
-        //top horizontal bar of S
-        glVertex3f(-0.5f, 0.5f, -2.0f);
-        glVertex3f(0.5f, 0.5f, -2.0f);
-    
-        //top left vertical bar of S
-        glVertex3f(-0.48f, 0.5f, -2.0f);
-        glVertex3f(-0.48f, 0.1f, -2.0f);
-    
-        //middle horizontal bar of S
-        glVertex3f(-0.5f, 0.1f, -2.0f);
-        glVertex3f(0.5f, 0.1f, -2.0f);
-    
-        //lower right vertical bar of S
-        glVertex3f(0.48f, 0.1f, -2.0f);
-        glVertex3f(0.48f, -0.3f, -2.0f);
-    
-        //bottom vertical bar of S
-        glVertex3f(0.5f, -0.3f, -2.0f);
-        glVertex3f(-0.5f, -0.3f, -2.0f);
-    glEnd();
-    
-    
     glBegin(GL_TRIANGLES);
-        //set color of middle triangle to green
-        glColor3f(0.0f, 1.0f, 0.0f);
     
-    //TREE VERTICES
-        //bottom left vertex
-        glVertex3f(-.2f, -.18f, -2.0f);
-    
-        //bottom right vertex
-        glVertex3f(0.2f, -.18f, -2.0f);
-    
-        //top vertex
-        glVertex3f(0.0f, .6f, -2.0f);
-    
-    //STUMP #1 VERTICES
-        //set color to brown
-        glColor3f(0.545098f, 0.270588f, 0.0745098f);
-    
-        //bottom left vertex
-    
-        glVertex3f(-.1f, -.35f, -2.0f);
-    
-        //bottom right vetex
-        glVertex3f(.1f, -.35f, -2.0f);
-    
-        //top right vertex
-        glVertex3f(.1f, -.18f, -2.0f);
-    
-    //STUMP #2 VERTICES
-        //set color to brown
-        glColor3f(0.545098f, 0.270588f, 0.0745098f);
-    
-        //top right vertex
-        glVertex3f(.1f, -.18f, -2.0f);
-    
-        //top left vertex
-        glVertex3f(-.1f, -.18f, -2.0f);
-    
-        //bottom left vertex
-        glVertex3f(-.1f, -.35f, -2.0f);
-    
+        //render faces
+        for (int i = 0; i < faceData.size(); ++i) {
+            
+            int triangleIndex = faceData[i]-1;
+            
+            float x, y, z;
+            
+            x = vertexData[triangleIndex].x;
+            y = vertexData[triangleIndex].y;
+            z = vertexData[triangleIndex].z;
+            
+            glVertex3f(x, y, z-2.0);
+        }
     glEnd();
-    
-    
     
     glFlush(); //forces execution, clears buffer
 }
@@ -169,8 +138,7 @@ void rotate(int button, int state, int x, int y){
 
 
 //adapted from: https://en.wikibooks.org/wiki/OpenGL_Programming/Modern_OpenGL_Tutorial_Load_OBJ
-void load(const char* fileName, vector<float>& vertexData, vector<float>& textureData,
-          vector<float>& faceData) {
+void load(const char* fileName) {
     ifstream input;
     input.open(fileName);
     
@@ -193,10 +161,10 @@ void load(const char* fileName, vector<float>& vertexData, vector<float>& textur
             is >> b;
             is >> c;
             
+            Vertex v(a, b, c);
+            
             //instead of adding 4th w vertex, set conditions to include w = 1.0f after every 3 vertices
-            vertexData.push_back(a);
-            vertexData.push_back(b);
-            vertexData.push_back(c);
+            vertexData.push_back(v);
         }
         //else if this is a texture coordinate line
         else if(line.substr(0,3) == "vt ") {
@@ -234,10 +202,6 @@ void load(const char* fileName, vector<float>& vertexData, vector<float>& textur
         //ignore all other lines including comments and vertex normal data
         else { }
     }
-    
-    cout << vertexData.size() << endl;
-    cout << textureData.size() << endl;
-    cout << faceData.size();
 }
 
 int main(int argc, char **argv) {
@@ -248,11 +212,8 @@ int main(int argc, char **argv) {
     glutInitDisplayMode(GLUT_RGB);
     glutCreateWindow("Stanford Logo with OpenGL");
     
-    //create data vectors and load geometry from obj files
-    vector<float> vertexData; //vertices
-    vector<float> textureData; //texture coordindates
-    vector<float> faceData; //faces
-    load(argv[1], vertexData, textureData, faceData);
+    //load geometry from obj files
+    load(argv[1]);
     
     //initialize state
     initOpenGL();
