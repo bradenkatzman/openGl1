@@ -9,7 +9,9 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <math.h>
 #include <vector>
+#include <stdio.h>
 #include <string>
 #include <GLUT/glut.h>
 
@@ -25,10 +27,15 @@ struct Vertex {
     }
 };
 
-//create data vectors
+//create static data vectors
 static vector<Vertex> vertexData; //vertices
 static vector<float> textureData; //texture coordindates
 static vector<float> faceData; //faces
+
+//create static orbit variables
+static int oldX, oldY;
+static bool rotateCheck = false;
+static float theta =0.0f, phi=0.0f;
 
 void initOpenGL() {
     //these commands ensure that drawing commands affect the projection matrix, rather than the model view matrix
@@ -90,49 +97,58 @@ void key(unsigned char key, int x, int y) {
             //i is zoom in
             case 'i':
                 glTranslated(0.0, 0.0, 0.1);
-                glutPostRedisplay();
             break;
             
             //o is zoom out
             case 'o':
                 glTranslated(0.0, 0.0, -.1);
-                glutPostRedisplay();
                 break;
             
             //W, A, Z, S make arrow pad
             case 'w':
                 glTranslated(0.0, 1.0, 0.0);
-                glutPostRedisplay();
                 break;
             
             case 'a':
                 glTranslated(-1.0, 0.0, 0.0);
-                glutPostRedisplay();
                 break;
             
             case 'z':
                 glTranslated(0.0, -1.0, 0.0);
-                glutPostRedisplay();
                 break;
         
             case 's':
                 glTranslated(1.0, 0.0, 0.0);
-                glutPostRedisplay();
+                break;
+            
+            //r for rotate right
+            case 'r':
+                glRotated(5.0, 0.0, 0.0, 10.0);
+                break;
+            
+            //l for rotate left
+            case 'l':
+                glRotated(-5.0, 0.0, 0.0, 10.0);
                 break;
     }
+     glutPostRedisplay();
 }
 
 //adapted from: https://www.opengl.org/discussion_boards/showthread.php/173157-Glut-Mouse-Func
-void rotate(int button, int state, int x, int y){
-    //right quadrant
-    if (x < glutGet(GLUT_WINDOW_WIDTH)/2) {
-        glRotated(5.0, 0.0, 0.0, 10.0);
-    }
+void orbit(int button, int state, int x, int y) {
+
+    theta += (x-oldX)*0.0001f;
+    phi   += (y-oldY)*0.0001f;
     
-    //left quadrant
-    if (x > glutGet(GLUT_WINDOW_WIDTH)/2){
-        glRotated(-5.0, 0.0, 0.0, 10.0);
-    }
+    oldX = x;
+    oldY = y;
+    
+    float eyeX = cos(phi)*sin(theta);
+    float eyeY = sin(phi)*sin(theta);
+    float eyeZ = -1 + cos(theta);
+    
+    gluLookAt(eyeX, eyeY, eyeZ, 0, 0, -1, 0,1,0);
+    
     glutPostRedisplay();
 }
 
@@ -189,6 +205,8 @@ void load(const char* fileName) {
             istringstream is(line.substr(2));
             
             //parse face info and push on faceData vector
+            
+            //if (
             int a, b, c;
             
             is >> a;
@@ -221,7 +239,7 @@ int main(int argc, char **argv) {
     
     //callbacks
     glutKeyboardFunc(key);
-    glutMouseFunc(rotate);
+    glutMouseFunc(orbit);
     
     glutMainLoop();
     return 0;
