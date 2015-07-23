@@ -92,24 +92,76 @@ void initOpenGL() {
 }
 void display() {
     
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT);
     
-    glEnable(GL_TEXTURE_2D);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    glShadeModel(GL_FLAT);
+    
+    glEnable(GL_DEPTH_TEST);
+    
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    
+    SimpleImage texPNG("cs148-cube.png");
+    int w = texPNG.width();
+    int h = texPNG.height();
+    
+    RGBColor* color = texPNG.data();
+    int max = w*h;
+    int parser = 0;
+    
+    //alocate data buffer
+    unsigned *colorData = (unsigned *)malloc(max*3*sizeof(unsigned)); //3 colors for each pixel
+    unsigned *frontColorData = colorData; //maintain pointer to front of colorData
+    while(parser++ < max) {
+        *colorData++ = (unsigned)color->r;
+        *colorData++ = (unsigned)color->g;
+        *colorData++ = (unsigned)color->b;
+        color++;
+    }
+
+    
+    //set up texture data
+    glGenTextures(1, &textureID);
+    
+    //bind new texture
     glBindTexture(GL_TEXTURE_2D, textureID);
     
+    // select modulate to mix texture with color for shading
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    
+    // the texture wraps over at the edges (repeat)
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    
+//        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+//        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+//        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+//                        GL_NEAREST);
+//        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+//                        GL_NEAREST);
+    
+    //give image to OpenGL
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_BGR,
+                 GL_UNSIGNED_BYTE, frontColorData);
+    
+    //free buffer
+    free(frontColorData);
+    
     //discards inivisible polygons during rendering
-//    glEnable(GL_CULL_FACE);
-//    glCullFace(GL_BACK);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
     
     //set wire color to red
-    glColor3f(0.2, 0.2, 0.4);
+    glColor3f(1.0, 0.0, 0.0);
     
     //set front faces to counterclockwise orientation i.e. front facing
     glFrontFace(GL_CCW);
     
     //instruct OpenGL to draw only the outline of the polygon
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    glBindTexture(GL_TEXTURE_2D, textureID);
     
     
     //points must have z coordinates within the interval [-1 - -5] to be visible
@@ -348,62 +400,6 @@ void load(const char* fileName) {
         else { }
     }
     
-    //set up texture
-    
-    glClearColor(0.0, 0.0, 0.0, 0.0);
-    
-    glShadeModel(GL_FLAT);
-    
-    glEnable(GL_DEPTH_TEST);
-    
-    glPixelStoref(GL_UNPACK_ALIGNMENT, 1);
-    
-    SimpleImage texPNG("cs148-cube.png");
-    int w = texPNG.width();
-    int h = texPNG.height();
-    
-    RGBColor* color = texPNG.data();
-    int max = w*h;
-    int parser = 0;
-    
-    //alocate data buffer
-    float *colorData = (float *)malloc(max*3*sizeof(float)); //3 colors for each pixel
-    float *frontColorData = colorData; //maintain pointer to front of colorData
-    while(parser++ < max) {
-        *colorData++ = color->r;
-        *colorData++ = color->g;
-        *colorData++ = color->b;
-        color++;
-    }
-    
-    
-    //set up texture data
-    glGenTextures(1, &textureID);
-    
-    //bind new texture
-    glBindTexture(GL_TEXTURE_2D, textureID);
-    
-    // select modulate to mix texture with color for shading
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-    
-    // the texture wraps over at the edges (repeat)
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    
-    //        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    //        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    //        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-    //                        GL_NEAREST);
-    //        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-    //                        GL_NEAREST);
-    
-    //give image to OpenGL
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_BGR,
-                 GL_FLOAT, frontColorData);
-    
-//    //free buffer
-      free(frontColorData);
-    
 }
 
 int main(int argc, char **argv) {
@@ -414,7 +410,6 @@ int main(int argc, char **argv) {
     glutInitDisplayMode(GLUT_RGB);
     const char* title = argv[1];
     glutCreateWindow(title);
-    
     
     
     //initialize state
