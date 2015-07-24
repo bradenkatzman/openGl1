@@ -12,7 +12,7 @@ CC = g++
 CFLAGS = -Wall -Wno-deprecated-declarations -framework GLUT -framework OpenGL
 
 # Causes "make all" to compile both main1 and main2.                             
-all: main main1 main2 
+all: main main1 main2 main3 main4
 
 # Compiles main1.cpp into the program main1, while linking with GL and GLUT      
 # Run with "make main1"                                                          
@@ -26,6 +26,12 @@ main1: main1.cpp
 # Identical to the above, except with main2 instead of main1                     
 main2: main2.cpp
 	$(CC) $(CFLAGS) main2.cpp -o main2
-# deletes main1 and main2 when "make clean" is called                            
+# deletes main1 and main2 when "make clean" is called   
+
+main3: main3.cpp SimpleImage.h SimpleImage.cpp stb_image.h stb_image_write.h stb.cpp    
+	$(CC) $(CFLAGS) main.cpp SimpleImage.cpp stb.cpp -o main3     
+
+main3: main4.cpp SimpleImage.h SimpleImage.cpp stb_image.h stb_image_write.h stb.cpp    
+	$(CC) $(CFLAGS) main.cpp SimpleImage.cpp stb.cpp -o main4            
 clean:
 	rm main1 main2

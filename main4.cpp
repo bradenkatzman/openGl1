@@ -192,24 +192,24 @@ void display() {
             
         //render first vertex
             //apply texture
-            int tc1 = face.tc1-1;
-            glTexCoord2f(textureData[tc1].x, textureData[tc1].y);
+//            int tc1 = face.tc1-1;
+//            glTexCoord2f(textureData[tc1].x, textureData[tc1].y);
 
             //plot vertex
             glVertex3f(x1, y1, z1-2.0);
             
         //render second vertex
             //apply texture
-            int tc2 = face.tc2-1;
-            glTexCoord2f(textureData[tc2].x, textureData[tc2].y);
+//            int tc2 = face.tc2-1;
+//            glTexCoord2f(textureData[tc2].x, textureData[tc2].y);
             
             //plot vertex
             glVertex3f(x2, y2, z2-2.0);
             
         //render third vertex
             //apply texture
-            int tc3 = face.tc3-1;
-            glTexCoord2f(textureData[tc3].x, textureData[tc3].y);
+//            int tc3 = face.tc3-1;
+//            glTexCoord2f(textureData[tc3].x, textureData[tc3].y);
             
             //plot vertex
             glVertex3f(x3, y3, z3-2.0);
