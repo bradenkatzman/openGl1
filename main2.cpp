@@ -209,8 +209,6 @@ void orbit(int button, int state, int x, int y) {
     glutPostRedisplay();
 }
 
-
-//adapted from: https://en.wikibooks.org/wiki/OpenGL_Programming/Modern_OpenGL_Tutorial_Load_OBJ
 void load(const char* fileName) {
     ifstream input;
     input.open(fileName);
@@ -224,7 +222,6 @@ void load(const char* fileName) {
     while(getline(input, line)) {
         //if this is a vertex line
         if (line.substr(0, 2) == "v ") {
-            //WRITE WHAT THIS DOES
             istringstream is(line.substr(2));
             
             //parse 3 vertices, push onto vertexData vector
@@ -246,7 +243,6 @@ void load(const char* fileName) {
             //parse coordinates and push on textureData vector
             float a, b;
             
-            //**********would need to check if there is third number before copying to c********
             is >> a;
             is >> b;
             
@@ -263,8 +259,6 @@ void load(const char* fileName) {
                 char c1, d1, c2, d2, c3, d3;
             
                 is >> v1;
-            
-            cout << is.peek() << endl;
             
                 //check if next character is /
                 if (is.peek() == '/') {
@@ -327,8 +321,6 @@ void load(const char* fileName) {
         //ignore all other lines including comments and vertex normal data
         else { }
     }
-    
-    cout << textureData.size();
 }
 
 int main(int argc, char **argv) {
@@ -354,5 +346,3 @@ int main(int argc, char **argv) {
     glutMainLoop();
     return 0;
 }
-
-//example: http://graphics.stanford.edu/courses/cs248-00/helpsession/opengl/code_example.html

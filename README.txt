@@ -17,7 +17,17 @@ Any issue I had in implementing this input was that all of the changes are in re
 
 I worked with classmate Xinyu Liang on the texture mapping section (mostly got help from this in office hours) and on the flat shading section.
 
+I included a Makefile which should compile all of my programs. I had trouble getting it to work at times, receiving the error
+"Undefined symbols for architecture x86_64:"
+	I also ran into this problem when working on the project XCode, and it took me a while to fix it by changing settings but I'm not sure how to fix this when working with a Makefile. However, the Makefile does show each program and the files it depends on. Sorry I couldn't get it working!
+
+
 Resources Used:
 zoom resource: https://www.opengl.org/archives/resources/faq/technical/viewing.htm
 
 orbit resource: https://www.opengl.org/discussion_boards/showthread.php/173157-Glut-Mouse-Func
+
+load resource: /adapted from: https://en.wikibooks.org/wiki/OpenGL_Programming/Modern_OpenGL_Tutorial_Load_OBJ
+
+full program resource: //example: http://graphics.stanford.edu/courses/cs248-00/helpsession/opengl/code_example.html
+//texture mapping reference: http://www.nullterminator.net/gltexture.html

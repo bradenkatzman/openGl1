@@ -98,14 +98,10 @@ void display() {
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     
-    //set wire color to red
-//    glColor3f(1.0, 0.0, 0.0);
     
     //set front faces to counterclockwise orientation i.e. front facing
     glFrontFace(GL_CCW);
     
-    //instruct OpenGL to draw only the outline of the polygon
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     
     //points must have z coordinates within the interval [-1 - -5] to be visible
     glBegin(GL_TRIANGLES);
@@ -165,7 +161,6 @@ void display() {
     glFlush(); //forces execution, clears buffer
 }
 
-//zoom resource: https://www.opengl.org/archives/resources/faq/technical/viewing.htm
 void key(unsigned char key, int x, int y) {
     switch (key) {
             //i is zoom in
@@ -208,7 +203,6 @@ void key(unsigned char key, int x, int y) {
     glutPostRedisplay();
 }
 
-//adapted from: https://www.opengl.org/discussion_boards/showthread.php/173157-Glut-Mouse-Func
 void orbit(int button, int state, int x, int y) {
     
     theta += (x-oldX)*0.0001f;
@@ -227,7 +221,6 @@ void orbit(int button, int state, int x, int y) {
 }
 
 
-//adapted from: https://en.wikibooks.org/wiki/OpenGL_Programming/Modern_OpenGL_Tutorial_Load_OBJ
 void load(const char* fileName) {
     ifstream input;
     input.open(fileName);
@@ -241,7 +234,6 @@ void load(const char* fileName) {
     while(getline(input, line)) {
         //if this is a vertex line
         if (line.substr(0, 2) == "v ") {
-            //WRITE WHAT THIS DOES
             istringstream is(line.substr(2));
             
             //parse 3 vertices, push onto vertexData vector
@@ -402,6 +394,3 @@ int main(int argc, char **argv) {
     glutMainLoop();
     return 0;
 }
-
-//example: http://graphics.stanford.edu/courses/cs248-00/helpsession/opengl/code_example.html
-//texture mapping reference: http://www.nullterminator.net/gltexture.html
